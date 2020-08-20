@@ -8,19 +8,26 @@ public class MTProblem2 {
 
     public static void main(String[] args) throws Exception {
 
-        MThread1 t1 = new MThread1();
+        final MThread1 t1 = new MThread1();
+
         t1.start();
 
-        synchronized (Thread.currentThread()) {
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                t1.display();
+            }
+        });
 
-            Thread.currentThread().wait();
+        t.start();
+        synchronized (MThread1.class) {
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
+
+                MThread1.class.wait();
                 if (i % 2 == 0) {
                     System.out.println("T2 " + i);
                 }
-                Thread.currentThread().wait();
-
+                MThread1.class.notify();
             }
         }
 
@@ -31,16 +38,29 @@ public class MTProblem2 {
 
 class MThread1 extends Thread {
 
+
     public void run() {
-        synchronized (this) {
-            for (int i = 0; i < 100; i++) {
+        synchronized (MThread1.class) {
+            for (int i = 0; i < 10; i++) {
                 if (i % 2 != 0) {
                     System.out.println("T1 " + i);
                 }
-                this.notify();
+
+                try{
+                    this.wait();
+
+
+                }catch (InterruptedException e){
+                    System.out.println("Exception Occured");
+                }
             }
         }
 
+    }
+
+    public void display() {
+
+        System.out.println("Printing Something");
 
     }
 }
